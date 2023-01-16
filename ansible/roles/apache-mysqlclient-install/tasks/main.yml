@@ -1,0 +1,81 @@
+- name: lamp environment
+  become: yes
+  block:
+    - name: Install tools (Ubuntu)
+      apt:
+        update_cache: yes
+        name: "{{tools}}"
+        force_apt_get: yes
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: Install tools (CentOS)
+      yum:
+        name: "{{tools}}"
+      when: ansible_distribution == "CentOS"
+
+
+    - name: Install tools (Amazon)
+      yum:
+        name: "{{tools}}"
+      when: ansible_distribution == "Amazon"
+
+
+    # Apache
+    - name: Install apache 2 (Ubuntu)
+      apt:
+        name: apache2
+        update_cache: yes
+        force_apt_get: yes
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: Install apache 2 (Amazon)
+      yum:
+        name: httpd
+        state: latest
+      when: ansible_distribution == "Amazon"
+
+
+    - name: Service apache2 enabled (Ubuntu)
+      service:
+        name: apache2
+        state: started
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: Service apache2 enabled (Amazon)
+      service:
+        name: httpd
+        state: started
+      when: ansible_distribution == "Amazon"
+
+
+    - name: Enable rewrite module
+      apache2_module:
+        name: rewrite
+        state: present
+        ignore_configcheck: True
+
+
+    # Mysql client
+    - name: Install mysql client (Ubuntu)
+      apt:
+        name: mysql-client
+        update_cache: yes
+        force_apt_get: yes
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: Install mysql client (Amazon)
+      yum:
+        name: mysql
+        state: latest
+      when: ansible_distribution == "Amazon"
+
+
+    - name: Restart Mysql (CentOS)
+      shell: systemctl restart mysql
+      when: ansible_distribution == "CentOS"

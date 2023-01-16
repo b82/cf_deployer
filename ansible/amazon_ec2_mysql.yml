@@ -1,0 +1,4 @@
+- hosts: amazon_ec2_mysql
+  roles:
+    - update-and-upgrade
+    - mysql-server-install

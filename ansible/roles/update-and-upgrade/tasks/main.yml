@@ -1,0 +1,21 @@
+- name: update and upgrade server
+  become: yes
+  block:
+    - name: apt upgrade OS packages (Ubuntu)
+      apt:
+        upgrade: dist
+        update_cache: yes
+        force_apt_get: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: yum upgrade OS packages (CentOS)
+      yum:
+        name: '*'
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+    - name: yum upgrade OS packages (Amazon)
+      yum:
+        name: '*'
+        state: latest
+      when: ansible_distribution == "Amazon"

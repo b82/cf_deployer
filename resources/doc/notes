@@ -1,0 +1,27 @@
+deployer CLI Tool
+
+
+- struttura progetto
+parameters
+	/env[dev|demo|prod]
+resources
+templates
+	/nested
+	main.yml
+
+
+
+- main.yaml
+legge il file JSON e in base ai suoi parametri mette in piedi l'infrastruttura
+
+
+
+- params.json
+richiama il template da deployare
+
+
+
+- nested_templates
+suddivisione logica in moduli logici delle risorse
+es. nested_templates > wordpress.yaml > contiene le EC2 per la macchina wordpress e MySQL o l'RDS MySQL da deployare
+

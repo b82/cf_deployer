@@ -1,0 +1,4 @@
+tools:
+  - wget
+  - tree
+  - net-tools

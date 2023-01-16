@@ -1,0 +1,170 @@
+- name: Install Wordpress
+  become: yes
+  block:
+    - name: Download and Extract WorPress
+      unarchive:
+        src: https://wordpress.org/latest.tar.gz
+        dest: /var/www/
+        remote_src: yes
+
+
+    - name: Upload wordpress.conf file (Ubuntu)
+      template:
+        src: ../templates/wordpress.conf
+        dest: /etc/apache2/sites-available/wordpress.conf
+        owner: root
+        group: root
+        mode: '0644'
+        remote_src: no
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: Upload wordpress.conf file (Amazon)
+      template:
+        src: ../templates/wordpress.conf
+        dest: /etc/httpd/conf.d/wordpress.conf
+        owner: root
+        group: root
+        mode: '0644'
+        remote_src: no
+      when: ansible_distribution == "Amazon"
+
+
+    - name: Remove 000-default.conf from sites-available (Ubuntu)
+      file:
+        path: /etc/apache2/sites-available/000-default.conf
+        state: absent
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: Remove welcome.conf from conf.d (Amazon)
+      file:
+        path: /etc/httpd/conf.d/welcome.conf
+        state: absent
+      when: ansible_distribution == "Amazon"
+
+
+    - name: Remove 000-default.conf from sites-enabled (Ubuntu)
+      file:
+        path: /etc/apache2/sites-enabled/000-default.conf
+        state: absent
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: Create symbolic link (Ubuntu)
+      file:
+        src: "../sites-available/wordpress.conf"
+        path: "/etc/apache2/sites-enabled/wordpress.conf"
+        state: link
+      when: ansible_distribution == "Ubuntu"
+
+
+#    - name: Create user for RDS
+#      mysql_user:
+#        login_user: admin
+#        login_password: password1111
+#        login_host: "{{RDSMySQLendpoint}}"
+#        name: deployer
+#        password: deployer11!
+#        host: "%"
+#        state: present
+#        priv: "*.*:ALL,GRANT"
+#
+#
+#    - name: create WP database from dump
+#      mysql_db:
+#        login_user: admin
+#        login_password: password1111
+#        login_host: "{{RDSMySQLendpoint}}"
+#        state: import
+#        name: wordpress
+#        target: roles/wordpress-install/files/wordpress.sql
+
+
+#    - name: Import WP database - death metal version
+#      shell: "mysql -h {{RDSMySQLendpoint}} -u admin -ppassword1111 wordpress < roles/wordpress-install/files/wordpress.sql"
+
+
+    - name: database created (Ubuntu)
+      shell: touch /home/ubuntu/DATABASE_CREATED
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: database created (Amazon)
+      shell: touch /home/ec2-user/DATABASE_CREATED
+      when: ansible_distribution == "Amazon"
+
+
+    - name: Restart Apache (Ubuntu)
+      service:
+        name: apache2
+        state: restarted
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: Restart Apache (Amazon)
+      service:
+        name: httpd
+        state: restarted
+      when: ansible_distribution == "Amazon"
+
+
+    - name: remove wp-config-sample.php
+      shell: rm /var/www/wordpress/wp-config-sample.php
+
+
+    - name: Upload wp-config.php from templates
+      template:
+        src: ../templates/wp-config.php
+        dest: /var/www/wordpress/
+        remote_src: no
+
+
+    - name: Update ownership to Apache user (Ubuntu)
+      file:
+        path: /var/www/wordpress/
+        state: directory
+        recurse: yes
+        owner: www-data
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: Update ownership to Apache user (Amazon)
+      file:
+        path: /var/www/wordpress/
+        state: directory
+        recurse: yes
+        owner: apache
+      when: ansible_distribution == "Amazon"
+
+
+    - name: Set the correct permissions on Wordpress directories
+      shell: find /var/www/wordpress/ -type d -exec chmod 750 {} \;
+
+
+    - name: Set the correct permissions for Wordpress files
+      shell: find /var/www/wordpress/ -type f -exec chmod 640 {} \;
+
+
+    - name: Restart Apache (Ubuntu)
+      service:
+        name: apache2
+        state: restarted
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: Restart Apache (Amazon)
+      service:
+        name: httpd
+        state: restarted
+      when: ansible_distribution == "Amazon"
+
+
+    - name: End
+      shell: touch /home/ubuntu/OK
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: End
+      shell: touch /home/ec2-user/OK2
+      when: ansible_distribution == "Amazon"

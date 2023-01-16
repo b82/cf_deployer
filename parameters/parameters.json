@@ -1,0 +1,30 @@
+[
+    {
+        "ParameterKey": "ProjectName",
+        "ParameterValue": "deployer-demo"
+    },
+    {
+        "ParameterKey": "Environment",
+        "ParameterValue": "demo"
+    },
+    {
+        "ParameterKey": "VPCCIDR",
+        "ParameterValue": "10.99.0.0/16"
+    },
+    {
+        "ParameterKey": "KeyPairName",
+        "ParameterValue": "luca-openvpn"
+    },
+    {
+        "ParameterKey": "CreateRedshift",
+        "ParameterValue": "False"
+    },
+    {
+        "ParameterKey": "BucketName",
+        "ParameterValue": "luca-formazione"
+    },
+    {
+        "ParameterKey": "InstanceProfile",
+        "ParameterValue": "luca-openvpn-s3-read-access"
+    }
+]

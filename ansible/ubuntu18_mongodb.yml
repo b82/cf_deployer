@@ -1,0 +1,4 @@
+- hosts: ubuntu18_mongodb
+  roles:
+    - update-and-upgrade
+    - mongodb-install

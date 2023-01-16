@@ -1,0 +1,5 @@
+- hosts: amazon_ec2_wordpress
+  roles:
+    - update-and-upgrade
+    - apache-mysqlclient-install
+    - wordpress-install

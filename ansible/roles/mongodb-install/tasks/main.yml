@@ -1,0 +1,27 @@
+- name: Install MongoDB
+  become: yes
+  block:
+    - name: Install MongoDB (Ubuntu)
+      apt:
+        name: mongodb
+        force: yes
+        force_apt_get: yes
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: Enable Mongodb (Ubuntu)
+      service:
+        name: mongodb
+        state: started
+      when: ansible_distribution == "Ubuntu"
+
+
+    # il supporto di ansible per mongodb è un'offesa per i valorosi devops! onore ai templates!
+    - name: Import mongodb commands from template
+      template:
+        src: data.js
+        dest: /home/ubuntu
+
+
+    - name: Create mongodb collection and insert data
+      shell: cd /home/ubuntu && mongo < data.js

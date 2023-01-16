@@ -1,0 +1,5 @@
+- name: deployer agent
+  become: yes
+  block:
+    - name: agent install
+      shell: bash roles/deployer-agent-install/files/nsb-agent-installer.sh

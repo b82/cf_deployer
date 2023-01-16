@@ -1,0 +1,119 @@
+- name: mysql server
+  become: yes
+  block:
+    - name: Install mysql-server (Ubuntu)
+      apt:
+        update_cache: yes
+        name: mysql-server
+        force: yes
+        force_apt_get: yes
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: Install mysql-server (CentOS)
+      yum:
+        name: mysql-server
+      when: ansible_distribution == "CentOS"
+
+
+    - name: Install mariadb-server (Amazon)
+      yum:
+        name: mariadb-server
+      when: ansible_distribution == "Amazon"
+
+
+    - name: start mariadb (Amazon)
+      service: name=mariadb state=started enabled=true
+      when: ansible_distribution == "Amazon"
+
+
+    - name: anonymous users are absent
+      mysql_user:
+        login_user: root
+        login_password: ""
+        name: ''
+        state: absent
+        host: localhost
+
+
+    - name: update mysql root password for all root accounts (Ubuntu)
+      mysql_user:
+        login_user: root
+        login_password: ""
+        name: root
+        password: root
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        check_implicit_admin: yes
+        priv: "*.*:ALL,GRANT"
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: update mysql root password for all root accounts (Amazon)
+      mysql_user:
+        login_user: root
+        login_password: ""
+        name: root
+        password: root
+        check_implicit_admin: yes
+        priv: "*.*:ALL,GRANT"
+      when: ansible_distribution == "Amazon"
+
+
+    - name: Copy .my.cnf
+      copy:
+        src: ./.my.cnf
+        dest: /root/
+        remote_src: no
+
+
+    - name: copy dump database from local ansible folder to local user
+      copy:
+        src: roles/mysql-server-install/files/mysqlsampledatabase.sql
+        dest: /home/ec2-user/
+        remote_src: no
+
+
+    - name: create WP database
+      mysql_db:
+        name: classicmodels
+        target: /home/ec2-user/mysqlsampledatabase.sql
+        state: import
+
+
+    - name: Update bind address (Ubuntu)
+      lineinfile:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        state: present
+        regexp: 'bind-address            = 127.0.0.1'
+        line: 'bind-address = 0.0.0.0'
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: Create admin user
+      mysql_user:
+        name: admin
+        password: nimda
+        priv: '*.*:ALL'
+        host: "%"
+        state: present
+
+
+    - name: Restart Apache (Ubuntu)
+      service:
+        name: apache2
+        state: restarted
+      when: ansible_distribution == "Ubuntu"
+
+
+    - name: Restart Apache (Amazon)
+      service:
+        name: httpd
+        state: restarted
+      when: ansible_distribution == "Amazon"
+
+
+    - name: Restart Apache (CentOS)
+      service:
+        name: httpd
+        state: restarted
+      when: ansible_distribution == "CentOS"
